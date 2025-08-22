@@ -1,0 +1,72 @@
+# LiveKit Voice Pipeline Agent - Local Development Setup
+# 
+# This Docker Compose file sets up a local LiveKit server for development.
+# For production deployment, use LiveKit Cloud instead.
+#
+# References:
+# - LiveKit Self-Hosting: https://docs.livekit.io/home/self-hosting/local/
+# - LiveKit Cloud: https://docs.livekit.io/home/cloud/
+# - Port Configuration: https://docs.livekit.io/home/self-hosting/ports-firewall/
+
+services:
+  # LiveKit Media Server
+  # Handles WebRTC connections, media routing, and room management
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit-server
+    restart: unless-stopped
+    
+    # Server configuration for local development
+    command: >
+      --dev                    # Development mode (debug logging, insecure)
+      --bind 0.0.0.0           # Bind to all interfaces
+      --keys "devkey: secret"  # Development API keys (NOT for production)
+    
+    # Port mappings for LiveKit services
+    ports:
+      - "7880:7880"           # HTTP/WebSocket API (signaling)
+      - "7881:7881"           # TURN/TLS server
+      - "7882:7882/udp"       # UDP for WebRTC media traffic
+    
+    # Environment variables for server configuration
+    environment:
+      # API Authentication (development keys)
+      LIVEKIT_KEYS: "devkey: secret"
+    # Network configuration
+    networks:
+      - livekit-network
+    
+    # Volume for persistent data (optional)
+    volumes:
+      - livekit-data:/data
+
+# Network configuration
+networks:
+  livekit-network:
+    driver: bridge
+    name: livekit-network
+
+# Volume configuration
+volumes:
+  livekit-data:
+    driver: local
+    name: livekit-data
+
+# Development vs Production Configuration
+#
+# LOCAL DEVELOPMENT (current setup):
+# - Uses development keys: "devkey: secret"
+# - Suitable for local testing
+#
+# PRODUCTION (LiveKit Cloud):
+# - Use LiveKit Cloud instead of self-hosting
+# - Full audio filtering and processing capabilities
+# - Global distribution and scaling
+# - Professional support and monitoring
+#
+# To switch to production:
+# 1. Sign up at https://cloud.livekit.io/
+# 2. Create a project and get API keys
+# 3. Update your .env file with cloud credentials
+# 4. Remove or comment out this compose.yml
+# 5. Update agent to use the Cloud URL

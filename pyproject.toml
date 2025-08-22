@@ -1,0 +1,22 @@
+[project]
+name = "voice-pipeline-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=0.3.27",
+    "langchain-openai>=0.3.30",
+    "langgraph>=0.6.6",
+    "langgraph-cli[inmem]>=0.3.8",
+    "livekit>=1.0.12",
+    "livekit-agents[cartesia,deepgram,openai,silero,turn-detector]~=1.2",
+    "livekit-plugins-cartesia>=1.2.6",
+    "livekit-plugins-deepgram>=1.2.6",
+    "livekit-plugins-langchain~=1.1",
+    "livekit-plugins-noise-cancellation~=0.2",
+    "livekit-plugins-openai>=1.2.6",
+    "livekit-plugins-silero>=1.2.6",
+    "livekit-plugins-turn-detector>=1.2.6",
+    "python-dotenv>=1.1.1",
+]

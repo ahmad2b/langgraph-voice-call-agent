@@ -1,0 +1,10 @@
+{
+    "graphs": {
+        "todo_agent": "./src/langgraph/agent.py:agent"
+    },
+    "env": ".env",
+    "dependencies": [
+        "."
+    ],
+    "dockerfile_lines": []
+}
