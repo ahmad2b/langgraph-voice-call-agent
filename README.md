@@ -287,3 +287,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ---
 
 Built with ❤️ using [LiveKit](https://livekit.io/) and [LangGraph](https://github.com/langchain-ai/langgraph)
+
+## 🙏 Acknowledgments
+
+Based on and inspired by [dqbd/langgraph-livekit-agents](https://github.com/dqbd/langgraph-livekit-agents).
