@@ -1,9 +1,9 @@
 [project]
-name = "voice-pipeline-agent"
+name = "langgraph-voice-call-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "A real-time voice/call AI agent that lets you talk to a LangGraph agent over LiveKit — similar to 'voice mode' experiences in ChatGPT Voice, OpenAI Realtime API sessions, and Gemini Live. This project demonstrates adapting any LangGraph agent into a full-duplex, low-latency voice assistant using LiveKit Agents."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "langchain>=0.3.27",
     "langchain-openai>=0.3.30",
