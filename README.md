@@ -1,29 +1,60 @@
-# LangGraph Voice Call Agent (LiveKit)
+# LangGraph Voice Call Agent
 
-A real-time voice/call AI agent that lets you talk to a LangGraph agent over LiveKit — similar to "voice mode" experiences in ChatGPT Voice, OpenAI Realtime API sessions, and Gemini Live. This repo demonstrates adapting any LangGraph agent into a full-duplex, low-latency voice assistant using LiveKit Agents.
+A real-time voice/call AI agent that lets you talk to a LangGraph agent over LiveKit, similar to "voice mode" experiences in ChatGPT Voice, OpenAI Realtime API sessions, and Gemini Live. This repo demonstrates adapting any LangGraph agent into a full-duplex, low-latency voice assistant using LiveKit's real-time communication infrastructure.
+
+This backend provides the core voice processing and AI agent functionality, built to work seamlessly with LiveKit's real-time infra and any frontend that supports LiveKit client connections.
+
+## Features
+
+- **Real-time voice interaction** with LangGraph agents
+- **Full-duplex communication** with low-latency audio processing
+- **Flexible LangGraph integration** - works with any LangGraph agent
+- **Comprehensive audio pipeline** including VAD, STT, TTS, and turn detection
+- **Thread-based conversation continuity** via participant metadata
 
 ## Project Structure
 
 ```
 langgraph-voice-call-agent/
-├── src/                          # Main source code
-│   ├── livekit/                  # LiveKit agent implementation
+├── src/                         # Main source code
+│   ├── livekit/                 # LiveKit agent implementation
 │   │   ├── agent.py             # Main agent entrypoint
 │   │   └── adapter/             # LangGraph integration
 │   │       └── langgraph.py     # LangGraph adapter for LiveKit
-│   └── langgraph/               # LangGraph definitions
-│       └── agent.py             # Todo management agent
-├── compose.yml                   # Docker Compose for local LiveKit server
+│   └── langgraph/               # LangGraph Agent Sdefinitions
+│       └── agent.py             # An example agent
+├── compose.yml                  # Docker Compose for local LiveKit server
 ├── pyproject.toml               # Python project configuration
 ├── uv.lock                      # uv dependency lock file
 └── Makefile                     # Development commands
 ```
 
+## How it works (high level)
+
+1. **Agent Initialization** → LiveKit agent connects to room and waits for participants
+2. **Audio Pipeline Setup** → VAD, STT, TTS, and turn detection models are loaded and configured  
+3. **LangGraph Integration** → Connect to LangGraph server
+4. **Voice Processing** → Real-time audio is processed through the pipeline:
+   - Voice Activity Detection (VAD) detects when user speaks
+   - Speech-to-Text (STT) transcribes audio to text
+   - LangGraph agent processes the query and generates responses
+   - Text-to-Speech (TTS) converts responses back to audio
+   - Turn detection manages conversation flow
+5. **Thread Continuity** → Conversation state is maintained via thread IDs from participant metadata
+
+## Architecture
+
+- **Backend**: Python with LiveKit Agents and LangGraph
+- **Voice Infrastructure**: LiveKit's real-time infra
+- **AI Agents**: LangGraph agents
+- **Audio Pipeline**: Deepgram STT/TTS, Silero VAD, English turn detection
+- **State Management**: Thread-based conversation continuity
+
 ## Quick Start
 
 ### Prerequisites
 
-- **Python 3.11+** with `uv` package manager
+- **Python 3.12+** with `uv` package manager
 - **Docker & Docker Compose** for local LiveKit server
 - **LiveKit Cloud account** (optional, for cloud deployment)
 
@@ -57,7 +88,7 @@ make dev
 uv run -m src.livekit.agent dev
 ```
 
-## 🔧 Development Setup
+## Development Setup
 
 ### Using `uv` (Recommended)
 
@@ -139,18 +170,9 @@ DEEPGRAM_API_KEY=your-deepgram-key
 
 # LangGraph dev server (optional; default http://localhost:2024)
 LANGGRAPH_URL=http://localhost:2024
-
-# Thread Management (optional)
-# Pass threadId via participant metadata for conversation continuity
-# If no metadata provided, LangGraph will create new conversation state
 ```
 
-### Notes on Audio Filters / Noise Cancellation
-
-- Enhanced noise cancellation and Cloud audio filters are a LiveKit Cloud feature.
-- On local servers, you may see warnings. This is expected.
-
-## ☁️ LiveKit Cloud Deployment
+## LiveKit Cloud Deployment
 
 For production use, deploy to LiveKit Cloud for better performance and features.
 
@@ -178,7 +200,7 @@ Modify `src/livekit/agent.py` to use cloud URL:
 # The agent will connect to LiveKit Cloud automatically
 ```
 
-## 📁 File Descriptions
+## File Descriptions
 
 ### Core Files
 
@@ -204,44 +226,22 @@ Modify `src/livekit/agent.py` to use cloud URL:
 - **`pyproject.toml`**: Python project configuration
 - **`Makefile`**: Development commands and shortcuts
 
-## 🔌 Plugin Integration
+## Testing the Agent
 
-### Speech Processing
+### Frontend
 
-- **VAD (Voice Activity Detection)**: Silero VAD for speech detection
-- **STT (Speech-to-Text)**: Deepgram for transcription
-- **TTS (Text-to-Speech)**: Deepgram for speech synthesis
-- **Turn Detection**: English model for conversation flow
+[LangGraph Voice Call Agent Web](https://github.com/ahmad2b/langgraph-voice-call-agent-web)
 
-### AI Integration
+#### Using the [LangGraph Voice Call Agent Web](https://github.com/ahmad2b/langgraph-voice-call-agent-web)
 
-- **LangGraph Agent**: Todo management with ReAct agent
-- **LLM**: OpenAI GPT-4 for reasoning and responses
-- **Streaming**: Real-time response generation
-
-## 🚦 Available Commands
-
-```bash
-# Development
-make dev                    # Run agent in development mode
-make langgraph-dev          # Run the LangGraph dev server (uv run langgraph dev)
-make dev-all                # Start LangGraph server and LiveKit agent together
-make download-files         # Download required model files
-make clean                  # Clean up cache files
-make help                   # Show available commands
-
-# Direct execution
-uv run -m src.livekit.agent dev
-uv run -m src.livekit.agent download-files
-```
-
-## 🌐 Testing the Agent
-
-### Frontend Options
-
-1. **LiveKit Examples**: Use frontends from [livekit-examples](https://github.com/livekit-examples/)
-2. **Custom Frontend**: Build your own using [LiveKit client SDKs](https://docs.livekit.io/reference/client-sdks/)
-3. **LiveKit Sandbox**: Test instantly with [LiveKit Cloud Sandbox](https://cloud.livekit.io/projects/p_/sandbox)
+1. Start this backend (see Quick Start above)
+2. Clone and run the frontend:
+   ```bash
+   git clone https://github.com/ahmad2b/langgraph-voice-call-agent-web.git
+   cd langgraph-voice-call-agent-web
+   npm install && npm run dev
+   ```
+3. Open http://localhost:3000
 
 ### Connection Details
 
@@ -250,44 +250,116 @@ uv run -m src.livekit.agent download-files
 - **Room**: Auto-generated room names
 - **Authentication**: API key/secret or JWT tokens
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-1. **Model Download Issues**: VAD and turn detection models need downloading
-   - Solution: Run `make download-files` first
+#### 1. **Model Download Issues** 
+VAD and turn detection models need downloading before first use.
 
-2. **Port Conflicts**: LiveKit ports already in use
-   - Solution: Check `docker compose ps` and stop conflicting services
+**Error symptoms:**
+```
+FileNotFoundError: Model files not found
+```
 
-3. **Import Errors**: Module not found
-   - Solution: Use `uv run -m src.livekit.agent` instead of direct file execution
+**Solution:**
+```bash
+make download-files
+# or directly
+uv run -m src.livekit.agent download-files
+```
 
-## 📚 References
+#### 2. **Port Conflicts**
+LiveKit ports already in use.
+
+**Solution:**
+```bash
+docker compose ps
+docker compose down  # Stop existing containers
+docker compose up -d
+```
+
+#### 3. **Import Errors**
+Module not found errors.
+
+**Solution:**
+Always use the module format:
+```bash
+# ✅ Correct
+uv run -m src.livekit.agent dev
+
+# ❌ Incorrect  
+python src/livekit/agent.py
+```
+
+#### 4. **LangGraph Connection Issues**
+Agent can't connect to LangGraph server.
+
+**Error symptoms:**
+```
+Connection refused to localhost:2024
+```
+
+**Solution:**
+```bash
+# Ensure LangGraph server is running
+uv run langgraph dev
+
+# Or run both together
+make dev-all
+```
+
+#### 5. **Environment Variable Issues**
+Missing or incorrect API keys.
+
+**Solution:**
+Create `.env` file with all required variables:
+```bash
+cp .env.example .env  # If available
+# Then edit .env with your actual keys
+```
+
+### Getting Help
+
+If you continue experiencing issues:
+
+1. **Check logs** for specific error messages
+2. **Verify system requirements** (Python 3.12+)
+3. **Test with minimal setup** (local LiveKit server first)
+4. **Check LiveKit Cloud status** if using cloud deployment
+
+## References
 
 - [LiveKit Agents Documentation](https://github.com/livekit/agents)
 - [LiveKit Self-Hosting Guide](https://docs.livekit.io/home/self-hosting/)
 - [LiveKit Cloud Documentation](https://docs.livekit.io/home/cloud/)
 - [LangGraph Documentation](https://github.com/langchain-ai/langgraph)
-- [LiveKit Client SDKs](https://docs.livekit.io/reference/client-sdks/)
 
-## 🤝 Contributing
+## Contributing
+
+This project is open source and welcome contributions! Please open a PR or issue through GitHub.
 
 This project demonstrates LiveKit + LangGraph integration patterns. Feel free to:
 
-- Report issues
-- Suggest improvements
+- Report issues and bugs
+- Suggest improvements and new features
 - Submit pull requests
-- Use as a reference for your own projects
+- Use as a reference for your own voice agent projects
+- Share your own LangGraph agent implementations
 
-## 📄 License
+## Connect
+
+I'm actively exploring voice-first and real-time agents. If you're building in this space or experimenting with real-time AI infrastructure, I'd love to trade ideas, collaborate, or help out.
+
+- GitHub: [ahmad2b](https://github.com/ahmad2b)  
+- Twitter/X: [@mahmad2b](https://x.com/mahmad2b)  
+- LinkedIn: [Ahmad Shaukat](https://www.linkedin.com/in/ahmad2b)  
+- Book a chat: [cal.com/mahmad2b/15min](https://cal.com/mahmad2b/15min)
+
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
----
+## Acknowledgments
 
-Built with ❤️ using [LiveKit](https://livekit.io/) and [LangGraph](https://github.com/langchain-ai/langgraph)
-
-## 🙏 Acknowledgments
-
-Based on and inspired by [dqbd/langgraph-livekit-agents](https://github.com/dqbd/langgraph-livekit-agents).
+Inspired by [dqbd/langgraph-livekit-agents](https://github.com/dqbd/langgraph-livekit-agents).
