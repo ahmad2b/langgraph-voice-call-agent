@@ -13,6 +13,7 @@ dependencies = [
     "livekit-agents[cartesia,deepgram,openai,silero,turn-detector]~=1.2",
     "livekit-plugins-cartesia>=1.2.6",
     "livekit-plugins-deepgram>=1.2.6",
+    "livekit-plugins-hume>=1.2.6",
     "livekit-plugins-langchain~=1.1",
     "livekit-plugins-noise-cancellation~=0.2",
     "livekit-plugins-openai>=1.2.6",

@@ -917,6 +917,7 @@ dependencies = [
     { name = "livekit-agents", extra = ["cartesia", "deepgram", "openai", "silero", "turn-detector"] },
     { name = "livekit-plugins-cartesia" },
     { name = "livekit-plugins-deepgram" },
+    { name = "livekit-plugins-hume" },
     { name = "livekit-plugins-langchain" },
     { name = "livekit-plugins-noise-cancellation" },
     { name = "livekit-plugins-openai" },
@@ -935,6 +936,7 @@ requires-dist = [
     { name = "livekit-agents", extras = ["cartesia", "deepgram", "openai", "silero", "turn-detector"], specifier = "~=1.2" },
     { name = "livekit-plugins-cartesia", specifier = ">=1.2.6" },
     { name = "livekit-plugins-deepgram", specifier = ">=1.2.6" },
+    { name = "livekit-plugins-hume", specifier = ">=1.2.6" },
     { name = "livekit-plugins-langchain", specifier = "~=1.1" },
     { name = "livekit-plugins-noise-cancellation", specifier = "~=0.2" },
     { name = "livekit-plugins-openai", specifier = ">=1.2.6" },
@@ -1095,6 +1097,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/de/20/e0df362e081ae46758c01c68fcd63fb8c4b68661c02f7dcb1305703e749a/livekit_plugins_deepgram-1.2.6.tar.gz", hash = "sha256:2ccb260c42ea1c6d931782bd13b347130cdba95abfa55af08d92544355e9e202", size = 13098, upload-time = "2025-08-18T21:07:11.811Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2d/4f/81966625c81d6e8c206f0c2ff30951cf68f55d13386cf239b639d4979b9c/livekit_plugins_deepgram-1.2.6-py3-none-any.whl", hash = "sha256:69a617dbb985b565db7689ad256d44da5ba963b342aca59de5f2cf95c11837c4", size = 15151, upload-time = "2025-08-18T21:07:10.638Z" },
+]
+
+[[package]]
+name = "livekit-plugins-hume"
+version = "1.2.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "livekit-agents" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b0/b0/3082b1796b17df506e5494961d2cf453fb11d1ac88954780737ad13cde7e/livekit_plugins_hume-1.2.6.tar.gz", hash = "sha256:f0a0886752409f9bb2eb65380f1c26444d725b6822d4992e98848b0fdad894c5", size = 6128, upload-time = "2025-08-18T21:07:23.999Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/76/5aba4c92bc6c9ab61448017f5b3629211170005982e362d8d2cff5157f60/livekit_plugins_hume-1.2.6-py3-none-any.whl", hash = "sha256:b63a5500a93b28219a52803953416a8a2db7f62d8a080f1b2d7e3f01ee0e9784", size = 6618, upload-time = "2025-08-18T21:07:23.18Z" },
 ]
 
 [[package]]

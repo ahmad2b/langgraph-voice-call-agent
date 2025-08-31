@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from langgraph.pregel.remote import RemoteGraph
 from livekit.agents import Agent, AgentSession, get_job_context
-from livekit.plugins import deepgram, silero
+from livekit.plugins import deepgram, silero, hume
 from livekit.plugins.turn_detector.english import EnglishModel
 from livekit.agents import (
     AutoSubscribe,
@@ -369,12 +369,15 @@ async def entrypoint(ctx: JobContext):
     # AgentSession wiring & options: https://github.com/livekit/agents/blob/main/README.md#_snippet_1
     session = AgentSession(
         vad=ctx.proc.userdata["vad"],
-        stt=deepgram.STT(),
-        llm=LangGraphAdapter(graph, config={"configurable": {"thread_id": thread_id}} if thread_id else {}),
-        tts=deepgram.TTS(),
+        stt=deepgram.STT(model="nova-3", language="en-US", interim_results=True),
+        llm=LangGraphAdapter(
+            graph,
+            config={"configurable": {"thread_id": thread_id}} if thread_id else {},
+        ),
+        tts=hume.TTS(),
         turn_detection=EnglishModel(),
-        min_endpointing_delay=0.5,
-        max_endpointing_delay=5.0,
+        min_endpointing_delay=0.8,
+        max_endpointing_delay=6.0,
     )
 
     # Start the agent session with VisionAssistant for video processing
