@@ -15,6 +15,7 @@ References:
 """
 
 from typing import Any, Optional
+import base64
 from httpx import HTTPStatusError
 from livekit.agents import llm
 from livekit.agents.types import (
@@ -25,6 +26,12 @@ from livekit.agents.types import (
 )
 from livekit.agents.utils import shortuuid
 from livekit.agents.llm.tool_context import FunctionTool, RawFunctionTool, ToolChoice
+from livekit.agents.utils.images import encode, EncodeOptions
+try:
+    # Prefer concrete ImageContent class if available
+    from livekit.agents.llm import ImageContent as LKImageContent  # type: ignore
+except Exception:  # pragma: no cover
+    LKImageContent = None  # sentinel; we'll fallback to hasattr checks
 from langgraph.pregel import Pregel
 from langchain_core.messages import BaseMessageChunk, AIMessage, HumanMessage, SystemMessage
 from langgraph.types import Command
@@ -115,28 +122,56 @@ class LangGraphStream(llm.LLMStream):
         for item in getattr(self._chat_ctx, "items", []):
             if getattr(item, "type", None) != "message":
                 continue
-            content = getattr(item, "text_content", None)
-            if not content:
-                continue
             role = getattr(item, "role", None)
             item_id = getattr(item, "id", None)
+
+            # Prefer rich content if available, else fallback to text_content
+            content_out: Any
+            raw_content = getattr(item, "content", None)
+            text_content = getattr(item, "text_content", None)
+
+            if isinstance(raw_content, list) and raw_content:
+                parts: list[dict[str, Any]] = []
+                for c in raw_content:
+                    if isinstance(c, str):
+                        parts.append({"type": "text", "text": c})
+                    elif (LKImageContent and isinstance(c, LKImageContent)) or hasattr(c, "image"):
+                        img_obj = getattr(c, "image", None)
+                        if isinstance(img_obj, str):
+                            parts.append({"type": "image_url", "image_url": {"url": img_obj}})
+                        else:
+                            try:
+                                img_bytes = encode(img_obj, EncodeOptions(format="JPEG"))
+                                data_url = f"data:image/jpeg;base64,{base64.b64encode(img_bytes).decode('utf-8')}"
+                                parts.append({"type": "image_url", "image_url": {"url": data_url}})
+                            except Exception:
+                                logger.warning("Unsupported image in ChatContext; skipping image part")
+                    else:
+                        logger.warning("Unsupported content type in ChatContext message; skipping")
+                content_out = parts if parts else (text_content or "")
+            else:
+                # Fallback to text only
+                if not text_content:
+                    continue
+                content_out = text_content
+
             if role == "assistant":
-                messages.append(AIMessage(content=content, id=item_id))
+                messages.append(AIMessage(content=content_out, id=item_id))
             elif role == "user":
-                messages.append(HumanMessage(content=content, id=item_id))
+                messages.append(HumanMessage(content=content_out, id=item_id))
             elif role in ["system", "developer"]:
-                messages.append(SystemMessage(content=content, id=item_id))
+                messages.append(SystemMessage(content=content_out, id=item_id))
 
         return {"messages": messages}
 
-    async def _get_interrupt(cls) -> Optional[str]:
+    async def _get_interrupt(self) -> Optional[str]:
         """Inspect graph state for latest assistant interrupt string.
 
         Uses Pregel.aget_state to retrieve interrupts from tasks.
         https://github.com/langchain-ai/langgraph/blob/main/docs/docs/reference/pregel.md
         """
         try:
-            state = await cls._graph.aget_state(config=cls._llm._config)
+            state = await self._graph.aget_state(config=self._llm._config)
             interrupts = [
                 interrupt for task in state.tasks for interrupt in task.interrupts
             ]
@@ -165,11 +200,17 @@ class LangGraphStream(llm.LLMStream):
             for c in msg.content:
                 if isinstance(c, str):
                     content.append({"type": "text", "text": c})
-                elif isinstance(c, llm.ChatImage):
-                    if isinstance(c.image, str):
-                        content.append({"type": "image_url", "image_url": c.image})
+                elif (LKImageContent and isinstance(c, LKImageContent)) or hasattr(c, "image"):
+                    img_obj = getattr(c, "image", None)
+                    if isinstance(img_obj, str):
+                        content.append({"type": "image_url", "image_url": {"url": img_obj}})
                     else:
-                        logger.warning("Unsupported image type")
+                        try:
+                            img_bytes = encode(img_obj, EncodeOptions(format="JPEG"))
+                            data_url = f"data:image/jpeg;base64,{base64.b64encode(img_bytes).decode('utf-8')}"
+                            content.append({"type": "image_url", "image_url": {"url": data_url}})
+                        except Exception:
+                            logger.warning("Unsupported image type; skipping")
                 else:
                     logger.warning("Unsupported content type")
         else:

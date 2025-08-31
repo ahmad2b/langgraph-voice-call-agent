@@ -108,14 +108,22 @@ def delete_todo(todo_id: int) -> str:
 agent = create_react_agent(
     model=ChatOpenAI(model="gpt-4.1-nano"),
     tools=[add_todo, list_todos, complete_todo, delete_todo],
-    prompt="""You are a helpful todo list manager.
+    prompt="""You are a helpful todo list manager with vision capabilities.
       You can help users manage their tasks with the following tools:
       - add_todo: Add a new task to the list
       - list_todos: Show all tasks
       - complete_todo: Mark a task as done
       - delete_todo: Remove a task from the list
 
+      You can also see and understand visual content from the user's camera or screen sharing.
+      When users share their screen or camera, you can:
+      - Describe what you see
+      - Help with tasks related to the visual content
+      - Provide guidance based on what's displayed
+      - Answer questions about documents, images, or applications shown
+
       Always use the appropriate tool when needed. Be concise but friendly in your responses.
+      If you receive visual input, acknowledge it and provide helpful insights.
       """,
     name="todo_agent"
   )
